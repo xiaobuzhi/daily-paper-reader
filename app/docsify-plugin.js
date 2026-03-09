@@ -234,46 +234,54 @@ window.$docsify = {
           .trim();
       };
 
-      const getRawPaperSections = (rawContent) => ({
-        aiSummaryText: splitRawSectionByTitle(
-          rawContent,
-          (title) => {
-            const t = normalizeTextForMeta(title).replace(/^\s*#{1,6}\s*/, '').trim().toLowerCase();
-            return (
-              t.includes('论文详细总结') ||
-              t.includes('论文详细总结（自动生成）') ||
-              t.includes('ai summary') ||
-              t.includes('🤖 ai summary') ||
-              t.includes('论文详细总结')
-            );
-          },
-        ),
-        originalAbstractText: splitRawSectionByTitle(
-          rawContent,
-          (title) => {
-            const t = normalizeTextForMeta(title)
-              .replace(/^\s*#{1,6}\s*/, '')
-              .trim()
-              .toLowerCase();
-            return (
-              t === 'abstract' ||
-              t.includes('原文摘要') ||
-              t.includes('original abstract') ||
-              (t.includes('摘要') && t.length <= 8)
-            );
-          },
-        ),
-        tldrText: splitRawSectionByTitle(
-          rawContent,
-          (title) => {
-            const t = normalizeTextForMeta(title)
-              .replace(/^\s*#{1,6}\s*/, '')
-              .trim()
-              .toLowerCase();
-            return t.includes('tldr') || t.includes('tl;dr') || t.includes('摘要要点');
-          },
-        ),
-      });
+      const getRawPaperSections = (rawContent) => {
+        const helper =
+          window.DPRZoteroMetaUtils &&
+          typeof window.DPRZoteroMetaUtils.getRawPaperSections === 'function'
+            ? window.DPRZoteroMetaUtils.getRawPaperSections
+            : null;
+        if (helper) {
+          return helper(rawContent);
+        }
+        return {
+          aiSummaryText: splitRawSectionByTitle(
+            rawContent,
+            (title) => {
+              const t = normalizeTextForMeta(title).replace(/^\s*#{1,6}\s*/, '').trim().toLowerCase();
+              return (
+                t.includes('论文详细总结') ||
+                t.includes('论文详细总结（自动生成）') ||
+                t.includes('ai summary') ||
+                t.includes('🤖 ai summary')
+              );
+            },
+          ),
+          originalAbstractText: splitRawSectionByTitle(
+            rawContent,
+            (title) => {
+              const t = normalizeTextForMeta(title)
+                .replace(/^\s*#{1,6}\s*/, '')
+                .trim()
+                .toLowerCase();
+              return (
+                t === 'abstract' ||
+                t.includes('原文摘要') ||
+                t.includes('original abstract')
+              );
+            },
+          ),
+          tldrText: splitRawSectionByTitle(
+            rawContent,
+            (title) => {
+              const t = normalizeTextForMeta(title)
+                .replace(/^\s*#{1,6}\s*/, '')
+                .trim()
+                .toLowerCase();
+              return t.includes('tldr') || t.includes('tl;dr') || t.includes('摘要要点');
+            },
+          ),
+        };
+      };
 
       const collectPaperBodySections = (sectionEl) => {
         if (!sectionEl || !sectionEl.children) return [];
